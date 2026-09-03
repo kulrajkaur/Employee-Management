@@ -6,6 +6,9 @@ import com.EmployeeLeaveManagementSystem.demo.Entity.LeaveStatus;
 import com.EmployeeLeaveManagementSystem.demo.Entity.LeaveType;
 import com.EmployeeLeaveManagementSystem.demo.Repository.EmployeeRepository;
 import com.EmployeeLeaveManagementSystem.demo.Repository.LeaveRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class LeaveService {
@@ -40,10 +44,8 @@ public class LeaveService {
                 (!fileName.toLowerCase().endsWith(".jpg")
                         && !fileName.toLowerCase().endsWith(".jpeg")
                         && !fileName.toLowerCase().endsWith(".png"))) {
-
             throw new RuntimeException("Only JPG and PNG files are allowed");
         }
-
         Employee employee=employeeRepository.findById(employeeId)
                 .orElseThrow(()->new RuntimeException("Employee Id not found"));
         String uploadDir= "uploads/";
@@ -51,7 +53,6 @@ public class LeaveService {
         if(!directory.exists()){
             directory.mkdir();
         }
-
         Path filePath= Paths.get(uploadDir + fileName);
         Files.copy(file.getInputStream(),
                 filePath, StandardCopyOption.REPLACE_EXISTING);
@@ -71,16 +72,22 @@ public class LeaveService {
         leave.setLeaveStatus(LeaveStatus.REJECTED);
         return leaveRepository.save(leave);
     }
-    public Leave acceptLeave(Long leaveId){
-        Leave leave = leaveRepository.findById(leaveId)
-                .orElseThrow(()->new RuntimeException("Leave not found"));
-        leave.setLeaveStatus(LeaveStatus.APPROVED);
-        return leaveRepository.save(leave);
-    }
     public Leave cancelLeave(Long leaveId){
         Leave leave = leaveRepository.findById(leaveId)
                 .orElseThrow(()->new RuntimeException("Leave not found"));
         leave.setLeaveStatus(LeaveStatus.CANCELLED);
         return leaveRepository.save(leave);
+    }
+    public Leave approveLeave(Long leaveId){
+        Leave leave= leaveRepository.findById(leaveId)
+                .orElseThrow(()->new RuntimeException("Leave not found"));
+        leave.setLeaveStatus(LeaveStatus.APPROVED);
+        return leaveRepository.save(leave);
+    }
+    public Page<Leave> showList(LeaveStatus leaveStatus, Pageable pageable){
+        if (leaveStatus == null) {
+            return leaveRepository.findAll(pageable);
+        }
+        return leaveRepository.findByStatus(leaveStatus,pageable);
     }
 }

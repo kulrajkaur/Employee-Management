@@ -4,6 +4,7 @@ import com.EmployeeLeaveManagementSystem.demo.Entity.Employee;
 import com.EmployeeLeaveManagementSystem.demo.Repository.EmployeeRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,10 +12,14 @@ import java.util.List;
 @Service
 public class EmployeeService{
 private final EmployeeRepository employeeRepository;
-public EmployeeService(EmployeeRepository employeeRepository){
-    this.employeeRepository= employeeRepository;}
+private final PasswordEncoder passwordEncoder;
+public EmployeeService(EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder){
+    this.employeeRepository= employeeRepository;
+    this.passwordEncoder=passwordEncoder;
+}
 // add employee//
-public Employee addEmployee(Employee employee){
+public Employee addEmployee(Employee employee) {
+    employee.setPassword(passwordEncoder.encode(employee.getPassword()));
 return employeeRepository.save(employee);
 }
 //list employees//
