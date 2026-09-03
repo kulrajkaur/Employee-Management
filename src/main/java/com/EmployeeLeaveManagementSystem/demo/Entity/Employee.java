@@ -20,6 +20,7 @@ public class Employee {
     private String password;
     @NotBlank
     private String department;
+    private String role;
 
     public Long getEmployeeId() {
         return employeeId;
@@ -59,5 +60,13 @@ public class Employee {
 
     public void setDepartment(String department) {
         this.department = department;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
